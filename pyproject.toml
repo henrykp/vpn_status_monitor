@@ -1,13 +1,13 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools", "wheel", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "vpn-monitor"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Monitors Windows App and enforces VPN usage."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 dependencies = [
     "psutil",
     "requests",
@@ -85,11 +85,6 @@ exclude = [
     "venv/",
 ]
 
-[tool.commitizen]
-name = "cz_conventional_commits"
-version = "0.1.0"
-version_files = [
-    "pyproject.toml:version"
-]
-tag_format = "v$version"
-update_changelog_on_bump = true
+[tool.setuptools_scm]
+version_scheme = "guess-next-dev"
+local_scheme = "no-local-version"

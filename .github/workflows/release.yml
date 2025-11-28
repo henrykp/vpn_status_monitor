@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 permissions:
   contents: write
@@ -21,7 +21,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |
@@ -47,14 +47,19 @@ jobs:
           }
           Write-Host "Build successful"
 
+      - name: Install git-cliff
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/orhun/git-cliff/releases/download/v2.7.0/git-cliff-2.7.0-x86_64-pc-windows-msvc.zip" -OutFile "git-cliff.zip"
+          Expand-Archive -Path "git-cliff.zip" -DestinationPath "git-cliff"
+          echo "$PWD\git-cliff\git-cliff-2.7.0" >> $env:GITHUB_PATH
+
       - name: Generate changelog
         id: changelog
-        uses: orhun/git-cliff-action@v4
-        with:
-          config: cliff.toml
-          args: --current --strip header
-        env:
-          OUTPUT: CHANGELOG.md
+        run: |
+          $changelog = git-cliff --config cliff.toml --current --strip header
+          "content<<EOF" >> $env:GITHUB_OUTPUT
+          $changelog >> $env:GITHUB_OUTPUT
+          "EOF" >> $env:GITHUB_OUTPUT
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -94,4 +99,3 @@ jobs:
           commit_message: "docs: update CHANGELOG.md for ${{ github.ref_name }}"
           file_pattern: CHANGELOG.md
           branch: main
-
