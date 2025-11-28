@@ -7,10 +7,11 @@ on:
 
 permissions:
   contents: write
+  id-token: write # Required for PyPI trusted publishing
 
 jobs:
-  release:
-    name: Build and Release
+  build-executable:
+    name: Build Executable
     runs-on: windows-latest
     steps:
       - name: Checkout code
@@ -47,19 +48,92 @@ jobs:
           }
           Write-Host "Build successful"
 
-      - name: Install git-cliff
+      - name: Upload executable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-executable
+          path: dist/vpn-monitor.exe
+
+  build-package:
+    name: Build Python Package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build dependencies
         run: |
-          Invoke-WebRequest -Uri "https://github.com/orhun/git-cliff/releases/download/v2.7.0/git-cliff-2.7.0-x86_64-pc-windows-msvc.zip" -OutFile "git-cliff.zip"
-          Expand-Archive -Path "git-cliff.zip" -DestinationPath "git-cliff"
-          echo "$PWD\git-cliff\git-cliff-2.7.0" >> $env:GITHUB_PATH
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      - name: Build package
+        run: python -m build
+
+      - name: Check package
+        run: twine check dist/*
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package
+          path: dist/
+
+  publish-pypi:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    needs: build-package
+    environment:
+      name: pypi
+      url: https://pypi.org/project/vpn-monitor/
+    steps:
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        # Uses trusted publishing (OIDC) - no token needed
+        # Configure at: https://pypi.org/manage/project/vpn-monitor/settings/publishing/
+
+  github-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [build-executable, build-package]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download executable
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-executable
+          path: artifacts/
+
+      - name: Download Python package
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package
+          path: dist/
 
       - name: Generate changelog
         id: changelog
-        run: |
-          $changelog = git-cliff --config cliff.toml --current --strip header
-          "content<<EOF" >> $env:GITHUB_OUTPUT
-          $changelog >> $env:GITHUB_OUTPUT
-          "EOF" >> $env:GITHUB_OUTPUT
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --current --strip header
+        env:
+          OUTPUT: CHANGELOG.md
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -69,14 +143,16 @@ jobs:
           draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}
           files: |
-            dist/vpn-monitor.exe
+            artifacts/vpn-monitor.exe
+            dist/*.whl
+            dist/*.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   update-changelog:
     name: Update CHANGELOG.md
     runs-on: ubuntu-latest
-    needs: release
+    needs: github-release
     if: ${{ !contains(github.ref_name, '-') }}
     steps:
       - name: Checkout code
