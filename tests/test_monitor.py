@@ -30,7 +30,7 @@ class TestPlaceholder:
     )
     def test_square(self, input_value, expected):
         """Parametrized test example."""
-        assert input_value ** 2 == expected
+        assert input_value**2 == expected
 
 
 class TestImports:
@@ -40,6 +40,7 @@ class TestImports:
         """Verify vpn_monitor package can be imported."""
         try:
             import vpn_monitor
+
             assert vpn_monitor is not None
         except ImportError as e:
             pytest.skip(f"Could not import vpn_monitor: {e}")
@@ -48,6 +49,7 @@ class TestImports:
         """Verify monitor module can be imported."""
         try:
             from vpn_monitor import monitor
+
             assert monitor is not None
         except ImportError as e:
             pytest.skip(f"Could not import monitor: {e}")
@@ -56,6 +58,7 @@ class TestImports:
         """Verify gui module can be imported."""
         try:
             from vpn_monitor import gui
+
             assert gui is not None
         except ImportError as e:
             pytest.skip(f"Could not import gui: {e}")
@@ -64,6 +67,7 @@ class TestImports:
         """Verify tray module can be imported."""
         try:
             from vpn_monitor import tray
+
             assert tray is not None
         except ImportError as e:
             pytest.skip(f"Could not import tray: {e}")
@@ -74,4 +78,3 @@ class TestImports:
 # - gui.py: Warning window display
 # - tray.py: System tray functionality
 # - main.py: CLI argument parsing, startup integration
-
