@@ -1,6 +1,6 @@
-import subprocess
-import logging
 import base64
+import logging
+import subprocess  # nosec B404
 
 # EPAM Colors
 COLOR_GRAVEL = "#464547"
@@ -84,6 +84,7 @@ if ($result -eq [System.Windows.Forms.DialogResult]::OK) {{
 }}
 """
 
+
 class WarningWindow:
     def __init__(self):
         self.process = None
@@ -92,12 +93,19 @@ class WarningWindow:
         if self.process is None or self.process.poll() is not None:
             logging.info("Showing Warning Window (PowerShell)")
             try:
-                encoded_command = base64.b64encode(POWERSHELL_WARNING_SCRIPT.encode('utf-16le')).decode('utf-8')
-                
+                script_bytes = POWERSHELL_WARNING_SCRIPT.encode("utf-16le")
+                encoded_command = base64.b64encode(script_bytes).decode("utf-8")
+
                 # CREATE_NO_WINDOW = 0x08000000
-                self.process = subprocess.Popen(
-                    ["powershell", "-NoProfile", "-NonInteractive", "-EncodedCommand", encoded_command],
-                    creationflags=0x08000000
+                self.process = subprocess.Popen(  # nosec B603 B607
+                    [
+                        "powershell",
+                        "-NoProfile",
+                        "-NonInteractive",
+                        "-EncodedCommand",
+                        encoded_command,
+                    ],
+                    creationflags=0x08000000,
                 )
             except Exception as e:
                 logging.error(f"Failed to start warning window: {e}")
@@ -117,23 +125,22 @@ class WarningWindow:
     def stop(self):
         self.hide()
 
+
 def get_input(title, prompt, default=""):
     try:
         script = POWERSHELL_INPUT_SCRIPT_TEMPLATE.format(
-            title=title,
-            prompt=prompt,
-            default_value=default
+            title=title, prompt=prompt, default_value=default
         )
-        
-        encoded_command = base64.b64encode(script.encode('utf-16le')).decode('utf-8')
-        
-        result = subprocess.run(
+
+        encoded_command = base64.b64encode(script.encode("utf-16le")).decode("utf-8")
+
+        result = subprocess.run(  # nosec B603 B607
             ["powershell", "-NoProfile", "-NonInteractive", "-EncodedCommand", encoded_command],
             capture_output=True,
             text=True,
-            creationflags=0x08000000
+            creationflags=0x08000000,
         )
-        
+
         output = result.stdout.strip()
         if output == "CANCELLED" or not output:
             return None
