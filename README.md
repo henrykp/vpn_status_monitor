@@ -68,25 +68,13 @@ The output will be in the `dist` folder.
 
 ### Releasing a New Version
 
-This project uses [Commitizen](https://commitizen-tools.github.io/commitizen/) for version management. To release a new version:
+This project uses [setuptools-scm](https://github.com/pypa/setuptools_scm) — the version is automatically derived from git tags. No version is stored in `pyproject.toml`.
+
+To release a new version:
 
 ```bash
-# Bump version (choose one)
-cz bump --increment PATCH  # 0.2.0 → 0.2.1
-cz bump --increment MINOR  # 0.2.0 → 0.3.0
-cz bump --increment MAJOR  # 0.2.0 → 1.0.0
-
-# Or let commitizen determine the bump from commit messages
-cz bump
-
-# Push changes and tag
-git push && git push --tags
+git tag v1.0.0
+git push --tags
 ```
 
-This will:
-
-1. Update the version in `pyproject.toml`
-2. Create a git commit with the version bump
-3. Create a git tag (e.g., `v0.3.0`)
-
-Pushing the tag triggers the release workflow, which builds the executable and creates a GitHub release.
+Pushing the tag triggers the release workflow, which builds the executable and creates a GitHub release. The package version is automatically set based on the tag (e.g., tag `v1.0.0` → version `1.0.0`).
