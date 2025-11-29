@@ -9,11 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🚀 Features
 
+- Publish to pypi ([#6](https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}/issues/6)) by @henrykp in [#6](https://github.com/henrykp/vpn_status_monitor/pull/6)
+
+## [0.5.0] - 2025-11-28
+
+### 🚀 Features
+
 - Fix build ([#5](https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}/issues/5)) by @henrykp in [#5](https://github.com/henrykp/vpn_status_monitor/pull/5)
 
 ### 🐛 Bug Fixes
 
 - Fix linter issues ([#3](https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}/issues/3)) by @henrykp in [#3](https://github.com/henrykp/vpn_status_monitor/pull/3)
+
+### 📚 Documentation
+
+- Update CHANGELOG.md for v0.4.0 by @henrykp
 
 ### ⚙️ CI/CD
 
