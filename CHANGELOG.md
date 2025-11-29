@@ -5,11 +5,20 @@ All notable changes to VPN Monitor will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.6.0] - 2025-11-29
 
 ### 🚀 Features
 
 - Publish to pypi ([#6](https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}/issues/6)) by @henrykp in [#6](https://github.com/henrykp/vpn_status_monitor/pull/6)
+
+### 🐛 Bug Fixes
+
+- Add PyPI publish by @henrykp
+- Merge conflict by @henrykp
+
+### 📚 Documentation
+
+- Update CHANGELOG.md for v0.5.0 by @henrykp
 
 ## [0.5.0] - 2025-11-28
 
