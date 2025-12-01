@@ -49,7 +49,7 @@ jobs:
           Write-Host "Build successful"
 
       - name: Upload executable artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: windows-executable
           path: dist/vpn-monitor.exe
@@ -59,12 +59,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
@@ -80,7 +80,7 @@ jobs:
         run: twine check dist/*
 
       - name: Upload package artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: python-package
           path: dist/
@@ -94,7 +94,7 @@ jobs:
       url: https://pypi.org/project/vpn-monitor/
     steps:
       - name: Download package artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: python-package
           path: dist/
@@ -110,18 +110,18 @@ jobs:
     needs: [build-executable, build-package]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Download executable
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: windows-executable
           path: artifacts/
 
       - name: Download Python package
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: python-package
           path: dist/
