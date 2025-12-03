@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 import threading
+import tkinter as tk
 import winreg
 
 from . import gui, monitor, tray
@@ -55,11 +56,14 @@ def remove_startup():
 class VPNMonitorApp:
     """Main application class for VPN Monitor."""
 
-    def __init__(self):
+    def __init__(self, root):
         """Initialize the VPN Monitor application."""
+        self.root = root
+        gui.set_root(root)
+
         self.allowed_country = ALLOWED_COUNTRY
         self.snooze_until = None
-        self.warning_window = gui.WarningWindow()
+        self.warning_window = gui.WarningWindow(root)
         self.tray_icon = tray.TrayIcon(
             on_exit=self.on_exit,
             on_snooze=self.on_snooze,
@@ -73,7 +77,8 @@ class VPNMonitorApp:
         logging.info("Exiting...")
         self.warning_window.stop()
         self.tray_icon.stop()
-        sys.exit(0)
+        # Schedule root destroy on main thread
+        self.root.after(0, self.root.quit)
 
     def on_snooze(self, minutes):
         """Handle snooze action."""
@@ -90,6 +95,7 @@ class VPNMonitorApp:
 
     def on_set_country(self):
         """Handle set country action."""
+        # This runs in tray thread, gui.get_input handles thread safety
         new_country = gui.get_input(
             "Set Allowed Country",
             "Enter 2-letter Country Code (e.g. US, DE):",
@@ -117,12 +123,21 @@ class VPNMonitorApp:
         """Start the application."""
         logging.info(f"Starting VPN Monitor. Allowed Country: {self.allowed_country}")
 
+        # Start Monitor Thread
         monitor_thread = threading.Thread(target=self.monitor_loop)
         monitor_thread.daemon = True
         monitor_thread.start()
 
+        # Start Tray Thread
+        # pystray run() blocks, so we put it in a thread
+        tray_thread = threading.Thread(target=self.tray_icon.run)
+        tray_thread.daemon = True
+        tray_thread.start()
+
         logging.info("App running. Check system tray.")
-        self.tray_icon.run()
+
+        # Run Tkinter Main Loop (Blocking)
+        self.root.mainloop()
 
 
 def main():
@@ -141,7 +156,11 @@ def main():
         remove_startup()
         return
 
-    app = VPNMonitorApp()
+    # Initialize Tkinter Root
+    root = tk.Tk()
+    root.withdraw()  # Hide the main window
+
+    app = VPNMonitorApp(root)
     app.run()
 
 
