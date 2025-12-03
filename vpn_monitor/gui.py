@@ -1,123 +1,87 @@
-import base64
 import logging
-import subprocess  # nosec B404
+import queue
+import threading
+import tkinter as tk
+from tkinter import simpledialog
 
 # EPAM Colors
 COLOR_GRAVEL = "#464547"
 COLOR_SCOOTER = "#39c2d7"
 COLOR_WHITE = "white"
 
-POWERSHELL_WARNING_SCRIPT = r"""
-Add-Type -AssemblyName System.Windows.Forms
-Add-Type -AssemblyName System.Drawing
+_root = None
 
-$form = New-Object System.Windows.Forms.Form
-$form.Text = "VPN Warning"
-$form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::None
-$form.TopMost = $true
-$form.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#464547")
-$form.Width = 450
-$form.Height = 120
-$form.StartPosition = "Manual"
-$form.ShowInTaskbar = $false
 
-$screenWidth = [System.Windows.Forms.Screen]::PrimaryScreen.WorkingArea.Width
-$form.Location = New-Object System.Drawing.Point(($screenWidth - 450 - 20), 20)
-
-# Side Strip
-$strip = New-Object System.Windows.Forms.Panel
-$strip.Width = 10
-$strip.Dock = "Left"
-$strip.BackColor = [System.Drawing.ColorTranslator]::FromHtml("#39c2d7")
-$form.Controls.Add($strip)
-
-# Label
-$label = New-Object System.Windows.Forms.Label
-$label.Text = "VPN DISCONNECTED!`nAccessing Windows App from unauthorized region."
-$label.ForeColor = "White"
-$label.Font = New-Object System.Drawing.Font("Segoe UI", 12, [System.Drawing.FontStyle]::Bold)
-$label.TextAlign = "MiddleCenter"
-$label.Dock = "Fill"
-$form.Controls.Add($label)
-
-$form.ShowDialog()
-"""
-
-POWERSHELL_INPUT_SCRIPT_TEMPLATE = r"""
-Add-Type -AssemblyName System.Windows.Forms
-Add-Type -AssemblyName System.Drawing
-
-$form = New-Object System.Windows.Forms.Form
-$form.Text = "{title}"
-$form.Size = New-Object System.Drawing.Size(300, 150)
-$form.StartPosition = "CenterScreen"
-$form.FormBorderStyle = "FixedDialog"
-$form.MaximizeBox = $false
-$form.MinimizeBox = $false
-$form.TopMost = $true
-
-$label = New-Object System.Windows.Forms.Label
-$label.Location = New-Object System.Drawing.Point(10, 20)
-$label.Size = New-Object System.Drawing.Size(280, 20)
-$label.Text = "{prompt}"
-$form.Controls.Add($label)
-
-$textBox = New-Object System.Windows.Forms.TextBox
-$textBox.Location = New-Object System.Drawing.Point(10, 50)
-$textBox.Size = New-Object System.Drawing.Size(260, 20)
-$textBox.Text = "{default_value}"
-$form.Controls.Add($textBox)
-
-$okButton = New-Object System.Windows.Forms.Button
-$okButton.Location = New-Object System.Drawing.Point(100, 80)
-$okButton.Text = "OK"
-$okButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
-$form.AcceptButton = $okButton
-$form.Controls.Add($okButton)
-
-$result = $form.ShowDialog()
-
-if ($result -eq [System.Windows.Forms.DialogResult]::OK) {{
-    Write-Output $textBox.Text
-}} else {{
-    Write-Output "CANCELLED"
-}}
-"""
+def set_root(root):
+    global _root
+    _root = root
 
 
 class WarningWindow:
-    def __init__(self):
-        self.process = None
+    def __init__(self, root):
+        self.root = root
+        self.window = None
+        self.is_visible = False
 
     def show(self):
-        if self.process is None or self.process.poll() is not None:
-            logging.info("Showing Warning Window (PowerShell)")
-            try:
-                script_bytes = POWERSHELL_WARNING_SCRIPT.encode("utf-16le")
-                encoded_command = base64.b64encode(script_bytes).decode("utf-8")
+        if self.is_visible:
+            return
 
-                # CREATE_NO_WINDOW = 0x08000000
-                self.process = subprocess.Popen(  # nosec B603 B607
-                    [
-                        "powershell",
-                        "-NoProfile",
-                        "-NonInteractive",
-                        "-EncodedCommand",
-                        encoded_command,
-                    ],
-                    creationflags=0x08000000,
-                )
-            except Exception as e:
-                logging.error(f"Failed to start warning window: {e}")
+        # Schedule GUI update on main thread
+        self.root.after(0, self._show_impl)
+
+    def _show_impl(self):
+        if self.window:
+            return  # Already exists
+
+        try:
+            self.window = tk.Toplevel(self.root)
+            self.window.overrideredirect(True)  # Frameless
+            self.window.attributes("-topmost", True)
+            self.window.configure(bg=COLOR_GRAVEL)
+
+            # Dimensions and Position
+            width = 450
+            height = 120
+            screen_width = self.window.winfo_screenwidth()
+            # Position top-right, with some padding
+            x = screen_width - width - 20
+            y = 20
+            self.window.geometry(f"{width}x{height}+{x}+{y}")
+
+            # Side Strip (Scooter color)
+            strip = tk.Frame(self.window, bg=COLOR_SCOOTER, width=10)
+            strip.pack(side="left", fill="y")
+
+            # Label
+            label = tk.Label(
+                self.window,
+                text="VPN DISCONNECTED!\nAccessing Windows App from unauthorized region.",
+                fg=COLOR_WHITE,
+                bg=COLOR_GRAVEL,
+                font=("Segoe UI", 12, "bold"),
+            )
+            label.pack(side="left", fill="both", expand=True, padx=10)
+
+            self.is_visible = True
+            logging.info("Warning Window Shown (Tkinter)")
+        except Exception as e:
+            logging.error(f"Failed to show warning window: {e}")
 
     def hide(self):
-        if self.process and self.process.poll() is None:
-            logging.info("Hiding Warning Window")
+        if not self.is_visible:
+            return
+        self.root.after(0, self._hide_impl)
+
+    def _hide_impl(self):
+        if self.window:
             try:
-                self.process.terminate()
-                self.process = None
+                self.window.destroy()
             except Exception as e:
-                logging.error(f"Failed to hide warning window: {e}")
+                logging.error(f"Error destroying window: {e}")
+            self.window = None
+        self.is_visible = False
+        logging.info("Warning Window Hidden")
 
     def start(self):
         pass
@@ -127,24 +91,24 @@ class WarningWindow:
 
 
 def get_input(title, prompt, default=""):
+    if not _root:
+        logging.error("GUI root not set, cannot ask for input.")
+        return None
+
+    # If we are in main thread, just call it
+    if threading.current_thread() is threading.main_thread():
+        return simpledialog.askstring(title, prompt, initialvalue=default, parent=_root)
+
+    # If in another thread, we need to ask main thread and wait
+    q = queue.Queue()
+
+    def task():
+        res = simpledialog.askstring(title, prompt, initialvalue=default, parent=_root)
+        q.put(res)
+
+    _root.after(0, task)
     try:
-        script = POWERSHELL_INPUT_SCRIPT_TEMPLATE.format(
-            title=title, prompt=prompt, default_value=default
-        )
-
-        encoded_command = base64.b64encode(script.encode("utf-16le")).decode("utf-8")
-
-        result = subprocess.run(  # nosec B603 B607
-            ["powershell", "-NoProfile", "-NonInteractive", "-EncodedCommand", encoded_command],
-            capture_output=True,
-            text=True,
-            creationflags=0x08000000,
-        )
-
-        output = result.stdout.strip()
-        if output == "CANCELLED" or not output:
-            return None
-        return output
-    except Exception as e:
-        logging.error(f"Error getting input: {e}")
+        return q.get(timeout=60)  # Wait up to 60s
+    except queue.Empty:
+        logging.error("Input dialog timed out")
         return None
