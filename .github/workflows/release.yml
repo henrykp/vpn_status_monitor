@@ -13,6 +13,11 @@ jobs:
   build-executable:
     name: Build Executable
     runs-on: windows-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -48,11 +53,29 @@ jobs:
           }
           Write-Host "Build successful"
 
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.5.0
+
+      - name: Sign executable with Cosign
+        run: |
+          cosign sign-blob --yes `
+            --output-certificate dist/vpn-monitor.exe.pem `
+            --output-signature dist/vpn-monitor.exe.sig `
+            dist/vpn-monitor.exe
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: dist/vpn-monitor.exe
+
       - name: Upload executable artifact
         uses: actions/upload-artifact@v5
         with:
           name: windows-executable
-          path: dist/vpn-monitor.exe
+          path: |
+            dist/vpn-monitor.exe
+            dist/vpn-monitor.exe.sig
+            dist/vpn-monitor.exe.pem
 
   build-package:
     name: Build Python Package
@@ -144,6 +167,8 @@ jobs:
           prerelease: ${{ contains(github.ref_name, '-') }}
           files: |
             artifacts/vpn-monitor.exe
+            artifacts/vpn-monitor.exe.sig
+            artifacts/vpn-monitor.exe.pem
             dist/*.whl
             dist/*.tar.gz
         env:

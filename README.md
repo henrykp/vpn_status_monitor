@@ -19,6 +19,11 @@ A Windows background application that monitors specific "Windows App" processes 
 - **Startup Integration**: Can register itself to run at Windows startup
 - **Continuous Monitoring**: Checks VPN status every 5 seconds
 
+## Security & Verification
+
+We take security seriously. All releases are signed using Sigstore and include SLSA build provenance.
+👉 **[Read how to verify the executable](VERIFICATION.md)**
+
 ## Installation
 
 ### Option 1: Install from PyPI (Recommended)
