@@ -69,7 +69,7 @@ jobs:
           subject-path: dist/vpn-monitor.exe
 
       - name: Upload executable artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: windows-executable
           path: |
@@ -103,7 +103,7 @@ jobs:
         run: twine check dist/*
 
       - name: Upload package artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: python-package
           path: dist/
@@ -117,7 +117,7 @@ jobs:
       url: https://pypi.org/project/vpn-monitor/
     steps:
       - name: Download package artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: python-package
           path: dist/
@@ -138,13 +138,13 @@ jobs:
           fetch-depth: 0
 
       - name: Download executable
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: windows-executable
           path: artifacts/
 
       - name: Download Python package
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: python-package
           path: dist/
