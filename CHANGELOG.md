@@ -5,6 +5,33 @@ All notable changes to VPN Monitor will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] - 2026-02-06
+
+### ⚙️ CI/CD
+
+- **deps:** Bump the github-actions group with 2 updates by @dependabot[bot] in [#10](https://github.com/henrykp/vpn_status_monitor/pull/10)
+
+## [1.2.1] - 2026-02-06
+
+### 🐛 Bug Fixes
+
+- Add bundles by @henrykp
+
+## [1.2.0] - 2026-02-06
+
+### 🐛 Bug Fixes
+
+- Add remote desctop application to the monitoring by @henrykp
+- Merge by @henrykp
+
+### 📚 Documentation
+
+- Update CHANGELOG.md for v1.1.0 by @henrykp
+
+### ⚙️ CI/CD
+
+- **deps:** Bump the github-actions group with 2 updates ([#9](https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}/issues/9)) by @dependabot[bot] in [#9](https://github.com/henrykp/vpn_status_monitor/pull/9)
+
 ## [1.1.0] - 2025-12-04
 
 ### 🚀 Features
