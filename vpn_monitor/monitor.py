@@ -9,7 +9,7 @@ import requests
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-TARGET_PROCESSES = ["msrdc.exe", "Windows365.exe"]
+TARGET_PROCESSES = ["msrdc.exe", "Windows365.exe", "msrdcw.exe"]
 
 
 def is_target_running():
