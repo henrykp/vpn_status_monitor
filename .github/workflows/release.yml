@@ -61,6 +61,7 @@ jobs:
           cosign sign-blob --yes `
             --output-certificate dist/vpn-monitor.exe.pem `
             --output-signature dist/vpn-monitor.exe.sig `
+            --bundle dist/vpn-monitor.exe.bundle `
             dist/vpn-monitor.exe
 
       - name: Attest build provenance
@@ -76,6 +77,7 @@ jobs:
             dist/vpn-monitor.exe
             dist/vpn-monitor.exe.sig
             dist/vpn-monitor.exe.pem
+            dist/vpn-monitor.exe.bundle
 
   build-package:
     name: Build Python Package
@@ -169,6 +171,7 @@ jobs:
             artifacts/vpn-monitor.exe
             artifacts/vpn-monitor.exe.sig
             artifacts/vpn-monitor.exe.pem
+            artifacts/vpn-monitor.exe.bundle
             dist/*.whl
             dist/*.tar.gz
         env:
