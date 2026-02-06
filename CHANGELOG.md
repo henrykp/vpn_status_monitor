@@ -5,15 +5,21 @@ All notable changes to VPN Monitor will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.1.0] - 2025-12-04
 
 ### 🚀 Features
 
 - Implement initial VPN monitor application with Tkinter GUI, sys… ([#8](https://github.com/{{ remote.github.owner }}/{{ remote.github.repo }}/issues/8)) by @henrykp in [#8](https://github.com/henrykp/vpn_status_monitor/pull/8)
+- Sign binaries by @henrykp
+
+### 🐛 Bug Fixes
+
+- Pre-commit hooks by @henrykp
 
 ### 📚 Documentation
 
 - Update CHANGELOG.md for v0.7.0 by @henrykp
+- Update CHANGELOG.md for v1.0.0 by @henrykp
 
 ### ⚙️ CI/CD
 
